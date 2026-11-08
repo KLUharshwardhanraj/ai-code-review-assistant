@@ -41,3 +41,17 @@ An enterprise-grade, full-stack application that automates code reviews and prov
 ```bash
 git clone [https://github.com/KLUharshwardhanraj/ai-code-review-assistant.git](https://github.com/KLUharshwardhanraj/ai-code-review-assistant.git)
 cd ai-code-review-assistant
+
+
+###📂 Project Structure
+Plaintext
+ai-code-review-assistant/
+├── src/main/java/com/example/aicodereview/
+│   ├── controller/      # REST API endpoints
+│   ├── service/         # Business logic & Gemini API integration
+│   ├── repository/      # Spring Data JPA data access layers
+│   ├── aspect/          # Spring AOP metrics and logging aspects
+│   └── config/          # OpenAPI and security configurations
+├── src/main/resources/
+│   └── application.yml  # Environment-agnostic configurations
+└── pom.xml              # Maven project descriptor
