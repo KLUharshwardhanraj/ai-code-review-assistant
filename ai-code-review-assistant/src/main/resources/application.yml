@@ -1,0 +1,100 @@
+# ==============================================================================
+# AI Code Review Assistant — Application Configuration
+# ==============================================================================
+
+spring:
+  application:
+    name: ai-code-review-assistant
+
+  # ─── DataSource ───
+  datasource:
+    url: jdbc:mysql://localhost:3306/ai_code_review?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000       # 5 minutes
+      max-lifetime: 1800000      # 30 minutes
+      connection-timeout: 20000  # 20 seconds
+
+  # ─── JPA / Hibernate ───
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Schema managed by migration scripts; Hibernate only validates
+    show-sql: false
+    open-in-view: false   # Disable OSIV to prevent lazy-loading outside transactions
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+
+  # ─── Jackson ───
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    serialization:
+      write-dates-as-timestamps: false  # ISO-8601 format
+    default-property-inclusion: non_null
+
+# ─── Server ───
+server:
+  port: 8080
+
+# ─── Actuator, Observability & Metrics ───
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ai-code-reviewer
+      environment: ${APP_ENV:dev}
+    distribution:
+      percentiles-histogram:
+        ai.gemini.api.latency: true
+        ai.review.session.processing.time: true
+      percentiles:
+        ai.gemini.api.latency: 0.5, 0.95, 0.99
+        ai.review.session.processing.time: 0.5, 0.95, 0.99
+      sla:
+        ai.gemini.api.latency: 1s, 2s, 5s, 10s, 25s
+        ai.review.session.processing.time: 1s, 3s, 7s, 15s, 30s
+
+# ─── SpringDoc / Swagger UI ───
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+# ─── Gemini API ───
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:your-api-key-here}
+    model: gemini-2.5-flash
+    url: https://generativelanguage.googleapis.com/v1beta/models
+    connect-timeout: 5000    # TCP handshake timeout (ms)
+    read-timeout: 25000      # Response wait timeout (ms) — generous for LLM inference
+
+# ─── Logging ───
+logging:
+  level:
+    root: INFO
+    com.aicodereviewer: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN

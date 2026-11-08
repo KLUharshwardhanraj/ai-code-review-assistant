@@ -1,0 +1,51 @@
+# ==============================================================================
+# Prometheus Scrape Configuration for AI Code Review Assistant
+# ==============================================================================
+global:
+  scrape_interval: 15s     # How frequently to scrape targets
+  evaluation_interval: 15s # How frequently to evaluate recording and alerting rules
+
+scrape_configs:
+  - job_name: 'ai-code-reviewer'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:8080']
+        labels:
+          application: 'ai-code-reviewer'
+          environment: 'production'
+
+# ==============================================================================
+# Production PromQL Queries for Monitoring & Grafana Dashboards
+# ==============================================================================
+#
+# 1. AI Suggestion Acceptance Rate (%)
+#    Calculates the proportion of AI recommendations accepted by human reviewers.
+#    Formula: (accepted) / (accepted + rejected) * 100
+#
+#    sum(rate(ai_review_feedback_decisions_total{decision="accepted"}[5m]))
+#    /
+#    (sum(rate(ai_review_feedback_decisions_total[5m])) > 0) * 100
+#
+# 2. 95th Percentile Gemini API Latency (p95)
+#    Computes the 95th percentile duration of LLM inference calls over 5 minutes.
+#
+#    histogram_quantile(0.95, sum(rate(ai_gemini_api_latency_seconds_bucket{status="success"}[5m])) by (le))
+#
+# 3. Gemini API Failure Rate Percentage (% over 5-minute window)
+#    Tracks rate of transient 5xx, 429 rate-limits, timeouts, and fallbacks against total requests.
+#
+#    (
+#      sum(rate(ai_gemini_api_failures_total[5m]))
+#      /
+#      (sum(rate(ai_review_submissions_total[5m])) > 0)
+#    ) * 100
+#
+# 4. Total Submissions per Language (rate per minute)
+#
+#    sum by (language) (rate(ai_review_submissions_total[5m])) * 60
+#
+# 5. Review Session End-to-End Processing Duration p99 (seconds)
+#
+#    histogram_quantile(0.99, sum(rate(ai_review_session_processing_time_seconds_bucket[5m])) by (le))
+# ==============================================================================

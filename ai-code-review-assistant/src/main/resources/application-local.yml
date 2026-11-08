@@ -1,0 +1,47 @@
+# ==============================================================================
+# AI Code Review Assistant — Zero-Setup Local In-Memory Profile (H2)
+# ==============================================================================
+# Activate with: mvn spring-boot:run -Dspring-boot.run.profiles=local
+# Use this when MySQL is not installed or running locally.
+# ==============================================================================
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:ai_code_review;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+logging:
+  level:
+    com.aicodereviewer: DEBUG
+    org.hibernate.SQL: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      cors:
+        allowed-origins: "http://localhost:5173"
+        allowed-methods: "GET,POST,OPTIONS"
+        allowed-headers: "*"
+  endpoint:
+    health:
+      show-details: always
